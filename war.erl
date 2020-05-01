@@ -15,7 +15,7 @@ start() ->
     battle(Rebels, Empires, [], 1).
 
 build_deck() ->
-    Ranks = lists:seq(1, 13),
+    Ranks = lists:seq(2, 14),
     Suits = [clubs, diamonds, hearts, spades],
     [{Rank, Suit} || Rank <- Ranks , Suit <- Suits].
 
@@ -60,7 +60,7 @@ battle([RebelBattling | RebelsWatching], [EmpireBattling | EmpiresWatching], Spo
         length(EmpiresWatching) < 4 ->
             io:fwrite("The Empire cannot sustain War.\n"),
             battle(RebelsWatching ++ EmpiresWatching, [], [], N);
-        EmpireBattlingRank == EmpireBattlingRank ->
+        RebelBattlingRank == EmpireBattlingRank ->
             {RebelSpoils, RebelsLeft} = split(3, RebelsWatching),
             {EmpireSpoils, EmpiresLeft} = split(3, EmpiresWatching),
             io:fwrite("War begins at battle #~p\n", [N]),
