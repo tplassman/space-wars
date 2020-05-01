@@ -1,10 +1,11 @@
 -module(war).
 
--import(lists, [seq/2, split/2]).
+-import(lists, [seq/2, sort/1, split/2]).
+-import(rand, [uniform/0]).
 
 -export([start/0]).
 
--define(Limit, 100).
+-define(Limit, 1000).
 
 start() ->
     Deck = build_deck(),
@@ -16,31 +17,25 @@ start() ->
 build_deck() ->
     Ranks = lists:seq(1, 13),
     Suits = [clubs, diamonds, hearts, spades],
-    Cards = [{Rank, Suit} || Rank <- Ranks , Suit <- Suits],
-    Cards.
+    [{Rank, Suit} || Rank <- Ranks , Suit <- Suits].
 
 shuffle_deck(Deck) ->
-    Cards = [S || {_, S} <- lists:sort([{rand:uniform(), Card} || Card <- Deck])],
-    Cards.
+    [Card || {_, Card} <- sort([{uniform(), Card} || Card <- Deck])].
 
-battle(Rebels, _, _, _) when length(Rebels) == 0 ->
-    io:fwrite("The Evil Empire won the war\n");
-battle(_, Empires, _, _) when length(Empires) == 0 ->
-    io:fwrite("The Rebel Scum won the war\n");
+battle(Rebels, _, _, N) when length(Rebels) == 0 ->
+    io:fwrite("The Evil Empire won the war after ~p battles\n", [N]);
+battle(_, Empires, _, N) when length(Empires) == 0 ->
+    io:fwrite("The Rebel Scum won the war after ~p battles\n", [N]);
 battle(_, _, _, N) when N > ?Limit ->
     io:fwrite("The war rages on after ~p battles\n", [?Limit]);
-battle(Rebels, Empires, Spoils, N) ->
-    [RebelBattling | RebelsWatching] = Rebels,
+battle([RebelBattling | RebelsWatching], [EmpireBattling | EmpiresWatching], Spoils, N) ->
     {RebelBattlingRank, RebelBattlingSuit} = RebelBattling,
-    [EmpireBattling | EmpiresWatching] = Empires,
     {EmpireBattlingRank, EmpireBattlingSuit} = EmpireBattling,
     BattleSpoils = Spoils ++ [RebelBattling, EmpireBattling],
 
     if
-        length(Spoils) == 0 ->
-            io:fwrite("Battle #~p\n", [N]);
-        length(Spoils) > 0 ->
-            io:fwrite("War for spoils:\n~p\n", [Spoils])
+        length(Spoils) == 0 -> io:fwrite("Battle #~p\n", [N]);
+        length(Spoils) > 0 -> io:fwrite("War for spoils:\n~p\n", [Spoils])
     end,
 
     io:fwrite("The Rebels throw ~p of ~p\n", [RebelBattlingRank, RebelBattlingSuit]),
@@ -68,8 +63,7 @@ battle(Rebels, Empires, Spoils, N) ->
         EmpireBattlingRank == EmpireBattlingRank ->
             {RebelSpoils, RebelsLeft} = split(3, RebelsWatching),
             {EmpireSpoils, EmpiresLeft} = split(3, EmpiresWatching),
-            WarSpoils = BattleSpoils ++ RebelSpoils ++ EmpireSpoils,
             io:fwrite("War begins at battle #~p\n", [N]),
             io:fwrite("================================\n"),
-            battle(RebelsLeft, EmpiresLeft, WarSpoils, N)
+            battle(RebelsLeft, EmpiresLeft, BattleSpoils ++ RebelSpoils ++ EmpireSpoils, N)
     end.
