@@ -22,9 +22,9 @@ build_deck() ->
 shuffle_deck(Deck) ->
     [Card || {_, Card} <- sort([{uniform(), Card} || Card <- Deck])].
 
-battle(Rebels, _, _, N) when length(Rebels) == 0 ->
+battle([], _, _, N) ->
     io:fwrite("The Evil Empire won the war after ~p battles\n", [N]);
-battle(_, Empires, _, N) when length(Empires) == 0 ->
+battle(_, [], _, N) ->
     io:fwrite("The Rebel Scum won the war after ~p battles\n", [N]);
 battle(_, _, _, N) when N > ?Limit ->
     io:fwrite("The war rages on after ~p battles\n", [?Limit]);
